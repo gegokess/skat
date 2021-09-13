@@ -4,13 +4,19 @@ from card import Card
 class Hand:
     # Defines a players hand during one round
     # of a skat game
-    def __init__(self, cards):
+    def __init__(self, cards, round):
         self.cards = cards
+        self.round = round
         self.jacks = self.get_jacks()
+        self.set_cards_round()
 
     # Sort Null
     # Sort Grand
     # Sort Suit
+
+    def set_cards_round(self):
+        for card in self.cards:
+            card.set_round(self.round)
 
     def has_card(self, card):
         for hand_card in self.cards:
@@ -35,12 +41,13 @@ class Hand:
         # generally the distance to the club jack defines the multiplier
         # however the presence of the club adds one on top
         if self.has_first_jack():
-            return self.get_jacks_from_top() + 1
-        else:
-            return self.get_jacks_from_top()
+            return self.get_lowest_successive_jack_from_highest_jack().suit.value + 1
+        elif self.jacks:
+            return self.get_highest_jack().suit.value
+        return 4
 
     def get_jacks(self):
-        # returns list of jacks on hand
+        # returns list of jacks in the hand
         jacks = list()
         for card in self.cards:
             if card.has_face(Card.Face.JACK):
@@ -48,12 +55,18 @@ class Hand:
         jacks.sort(key=lambda x: x.suit.value, reverse=False)
         return jacks
 
-    def get_jacks_from_top(self):
-        # returns the difference between the club jack
-        # and the next jack on the hand
-        if self.jacks:
-            return self.get_highest_jack().suit.value
-        return 4
+    def get_lowest_successive_jack_from_highest_jack(self):
+        # Determines the lowest jack which is successive to the highest jack
+        # in the hand
+        if len(self.jacks) == 1:
+            return self.get_highest_jack()
+        elif len(self.jacks) == 2 and self.get_highest_jack().suit.value + 1 == self.get_lowest_jack().suit.value:
+            return self.get_lowest_jack()
+        elif len(self.jacks) == 3 and self.get_highest_jack().suit.value + 1 == self.get_lowest_jack().suit.value - 1:
+            return self.get_lowest_jack()
+        elif len(self.jacks) == 4:
+            return self.get_lowest_jack()
+        return self.get_highest_jack()
 
     def get_highest_jack(self):
         # get the highest jack of the hand
@@ -61,9 +74,15 @@ class Hand:
             return self.jacks[0]
         return None
 
+    def get_lowest_jack(self):
+        # get the highest jack of the hand
+        if self.jacks:
+            return self.jacks[len(self.jacks) - 1]
+        return None
+
     def lay_card(self, card):
         # Lays card from hand
-        # Returns removed card if found in hand
+        # Returns removed card if found in the hand
         if self.cards.remove(card):
             return card
         return False

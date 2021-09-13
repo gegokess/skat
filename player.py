@@ -11,10 +11,27 @@ class Player:
         self.name = name
         self.type = None
         self.hand = None
-        self.trick_stack = dict()  # {game_round: [(player, card), ...]}
+        self.tricks = list()
+
+    def add_trick(self, trick):
+        self.tricks.append(trick)
+        return True
+
+    def get_tricks_from_round(self, round):
+        # gets all the tricks the player has won in a specific round
+        tricks = list()
+        if self.tricks:
+            for trick in self.tricks:
+                if trick.get_round() == round:
+                    tricks.append(trick)
+            return tricks
+        return False
 
     def set_hand(self, hand):
         self.hand = hand
+
+    def get_hand(self):
+        return self.hand
 
     def sum_trick_values(self):
         sum_tricks = 0
@@ -34,10 +51,10 @@ class Player:
         return self.hand.has_face(face)
 
     def __repr__(self):
-        return "id=" + str(id) + "name=" + self.name + " cards=" + str(self.cards)
+        return "id=" + str(id) + "name=" + self.name + " cards=" + str(self.hand)
 
     def __eq__(self, other):
-        return other is not None and self.id is other.id
+        return other is not None and self.name is other.name
 
     def __ne__(self, other):
         return not self.__eq__(other)

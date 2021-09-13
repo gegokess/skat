@@ -31,9 +31,30 @@ class Round:
         SCHWARZ = 4
         OUVERT = 5
 
+    def is_suit(self):
+        # returns True if the round is declared to be a suit game
+        return self.type in [
+            Round.Type.CLUB,
+            Round.Type.SPADE,
+            Round.Type.HEART,
+            Round.Type.DIAMOND
+        ]
+
+    def get_type(self):
+        return self.type
+
+    def is_grand(self):
+        return self.type == Round.Type.GRAND
+
+    def is_NULL(self):
+        return self.type == Round.Type.NULL
+
     def set_declarer(self, declarer):
         self.declarer = declarer
         return True
+
+    def get_declarer(self):
+        return self.declarer
 
     def set_type(self, type):
         if self.declarer:
@@ -46,18 +67,18 @@ class Round:
         if self.type == Round.Type.NULL:
             return 1
         else:
-            return self.type_multiplier() * (self.jack_multiplier() + self.variant_multiplier() + 1)
+            return self.get_type_multiplier() * (self.get_jack_multiplier() + self.get_variant_multiplier() + 1)
 
-    def jack_multiplier(self):
+    def get_jack_multiplier(self):
         if self.type == Round.Type.NULL:
             return 1
         else:
-            return self.declarer.hand.get_jack_multiplier()
+            return self.get_declarer().get_hand().get_jack_multiplier()
 
-    def type_multiplier(self):
+    def get_type_multiplier(self):
         return self.type.value
 
-    def variant_multiplier(self):
+    def get_variant_multiplier(self):
         return int(self.is_hand()) + int(self.is_schneider()) + int(self.is_ouvert())
 
     def is_hand(self):

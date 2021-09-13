@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from enum import Enum
+from round import Round
 
 
 class Card:
@@ -87,9 +88,67 @@ class Card:
             jacks.append(Card(suit, Card.Face.JACK))
         return jacks
 
+    def set_round(self, round):
+        # sets the round the card is played in
+        self.round = round
+
+    def get_round(self, round):
+        # gets the round the card is played in
+        return self.round
+
+    def is_trump(self):
+        # Checks wether or not the card is trump
+        if self.round.is_NULL():
+            return True
+        elif self.round.is_grand():
+            return self.has_face(Card.Face.JACK)
+        elif self.round.is_suit():
+            return 12 - self.suit.value == self.round.get_type().value
+
+    def is_jack(self):
+        return self.has_face(Card.Face.JACK)
+
+    def is_not_jack(self):
+        return not self.is_jack()
+
+    def is_greater_NULL_game(self, other):
+        # defines the greater comparision of two cards in a NULL game
+        if self.has_suit(other.suit):
+            return self.face.value > other.face.value
+        return False
+
+    def is_less_NULL_game(self, other):
+        # defines the less comparision of two cards in a NULL game
+        if not self.__eq__(other):
+            return self.is_greater_NULL_game(other)
+        return False
+
+    def is_greater_non_NULL_game(self, other):
+        # defines the greater comparision of two cards in a non NULL game
+
+        # self is trump or jack while the other card isn't
+        if self.is_trump() and not other.is_trump() or self.is_jack() and other.is_not_jack():
+            return True
+
+        # both are jacks
+        elif self.is_jack() and other.is_jack():
+            return self.suit.value < other.suit.value
+
+        # both have the same suit and other is not a jack
+        elif self.has_suit(other.suit) and other.is_not_jack():
+            return self.face.value > other.face.value
+        return False
+
+    def is_less_non_NULL_game(self, other):
+        # defines the less comparision of two cards in a non NULL game
+        if self.__eq__(other):
+            return False
+        return not self.is_greater_non_NULL_game(other)
+
     def __init__(self, suit, face):
         self.suit = suit
         self.face = face
+        self.round = None
 
     def __repr__(self):
         return Card.Face.to_display(self.face) + Card.Suit.to_display(self.suit)
@@ -102,3 +161,27 @@ class Card:
 
     def __hash__(self):
         return hash((self.suit, self.face))
+
+    def __gt__(self, other):
+        if self.round.is_NULL():
+            return self.is_greater_NULL_game(other)
+        else:
+            return self.is_greater_non_NULL_game(other)
+
+    def __ge__(self, other):
+        if self.__eq__(other):
+            return True
+        else:
+            return self > other
+
+    def __lt__(self, other):
+        if self.round.is_NULL():
+            return self.is_less_NULL_game(other)
+        else:
+            return self.is_less_non_NULL_game(other)
+
+    def __le__(self, other):
+        if self.__eq__(other):
+            return True
+        else:
+            return self < other
