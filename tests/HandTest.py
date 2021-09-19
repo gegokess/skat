@@ -9,6 +9,27 @@ import unittest
 
 class HandTest(unittest.TestCase):
 
+    # TODO: Sort hand tests
+    def test_sort_hand_null(self):
+        deck = Deck()
+        # Arrange
+        cards = deck.cards
+
+        player = Player("TestPlayer")
+
+        round = Round(1)
+        round.set_declarer(player)
+        round.set_type(Round.Type.NULL)
+        hand = Hand(cards, round)
+
+        # Act
+        hand.sort_hand_for_null()
+        # Assert
+        self.assertEqual(
+            hand.cards[0], Card(Card.Suit.CLUB), Card.Face.JACK)
+        self.assertEqual(
+            hand.cards[31], Card(Card.Suit.DIAMOND, Card.Face.SEVEN))
+
     def test_jack_multiplier_1(self):
         # Arrange
         cards = [

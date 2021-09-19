@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from enum import Enum
-from round import Round
 
 
 class Card:
@@ -119,9 +118,7 @@ class Card:
 
     def is_less_NULL_game(self, other):
         # defines the less comparision of two cards in a NULL game
-        if not self.__eq__(other):
-            return self.is_greater_NULL_game(other)
-        return False
+        return not self.is_greater_NULL_game(other)
 
     def is_greater_non_NULL_game(self, other):
         # defines the greater comparision of two cards in a non NULL game
@@ -137,12 +134,12 @@ class Card:
         # both have the same suit and other is not a jack
         elif self.has_suit(other.suit) and other.is_not_jack():
             return self.face.value > other.face.value
+
+        # everything else
         return False
 
     def is_less_non_NULL_game(self, other):
         # defines the less comparision of two cards in a non NULL game
-        if self.__eq__(other):
-            return False
         return not self.is_greater_non_NULL_game(other)
 
     def __init__(self, suit, face):

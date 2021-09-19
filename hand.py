@@ -9,10 +9,81 @@ class Hand:
         self.round = round
         self.jacks = self.get_jacks()
         self.set_cards_round()
+        self.tricks = list()
 
-    # Sort Null
-    # Sort Grand
-    # Sort Suit
+    def get_tricks(self):
+        return self.tricks
+
+    def get_points(self):
+        points = 0
+        for trick in self.get_tricks():
+            points = trick.get_points() + points
+        return points
+
+    def get_number_of_tricks(self):
+        return len(self.tricks)
+
+    def sort_hand(self):
+        if self.round.is_grand():
+            self.sort_hand_for_grand()
+        elif self.round.is_suit():
+            self.sort_hand_for_suit()
+        else:
+            self.sort_hand_for_null()
+
+    def sort_hand_for_null(self):
+        # sorts the hand from heighest to lowest according to null game rules
+        self.cards = sorted(self.cards, key=lambda x: (
+            4 - x.suit.value, x.face.value), reverse=True)
+
+    def sort_hand_for_grand(self):
+        # sorts the hand from heighest to lowest according to grand game rules
+        # basic order
+        self.sort_hand_for_null()
+
+        # add sorted jacks
+        new_ordered_cards = self.get_jacks()
+
+        # add rest of the cards
+        new_ordered_cards.extend(self.get_cards_from_non_trump_suits())
+
+        self.cards = new_ordered_cards
+
+    def sort_hand_for_suit(self):
+        # sorts the hand from heighest to lowest according to suit game rules
+        # basic order
+
+        # sort for null
+        self.sort_hand_for_null()
+
+        # add sorted jacks
+        new_ordered_cards = self.get_jacks()
+
+        # add sorted trump suit
+        new_ordered_cards.extend(
+            self.get_cards_from_trump_suit())
+
+        # add rest of the cards
+        new_ordered_cards.extend(
+            self.get_cards_from_non_trump_suits())
+
+        self.cards = new_ordered_cards
+
+    def get_cards_from_trump_suit(self):
+        return self.get_cards_depending_on_trump_status(True)
+
+    def get_cards_from_non_trump_suits(self):
+        return self.get_cards_depending_on_trump_status(False)
+
+    def get_cards_depending_on_trump_status(self, trump):
+        # returns the cards from the requested suit if trump==true,
+        # otherwise returns all cards except the request trump cards
+        # jacks are excluded
+        cards = list()
+        for card in self.cards:
+            if card.is_trump() == trump and card.is_not_jack():
+                cards.append(card)
+        return cards
 
     def set_cards_round(self):
         for card in self.cards:
@@ -25,12 +96,14 @@ class Hand:
         return False
 
     def has_suit(self, suit):
+        # checks wether the hand contains a card of the requested suit
         for card in self.cards:
             if card.has_suit(suit):
                 return True
         return False
 
     def has_face(self, face):
+        # checks wether the hand contains a card of the requested face
         for card in self.cards:
             if card.has_face(face):
                 return True
@@ -71,7 +144,7 @@ class Hand:
     def get_highest_jack(self):
         # get the highest jack of the hand
         if self.jacks:
-            return self.jacks[0]
+            return self.get_jacks()[0]
         return None
 
     def get_lowest_jack(self):
@@ -82,7 +155,7 @@ class Hand:
 
     def lay_card(self, card):
         # Lays card from hand
-        # Returns removed card if found in the hand
+        # Returns layed card if found in the hand
         if self.cards.remove(card):
             return card
         return False
